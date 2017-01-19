@@ -66,7 +66,7 @@ ifeq ($(TARGET),3DS)
     BANNER_IMAGE := resources/FonzD_banner.cgfx
     #BANNER_IMAGE := resources/PabloMK7_banner.cgfx
     ICON := resources/icon.png
-	LOGO := 
+	LOGO := resources/logo.bcma.lz
 endif
 
 # Wii U CONFIGURATION #
