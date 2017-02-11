@@ -11,7 +11,28 @@ endif
 
 # COMMON CONFIGURATION #
 
-NAME := Boot NTR Selector
+FONZD = 0
+PABLOMK7 = 0
+EXTENDEDMODE = 0
+
+ifeq ($(EXTENDEDMODE), 1)
+    ifeq ($(FONZD), 1)
+	    NAME := BootNTRSelector-Mode-3-FONZD-Banner
+	endif
+
+	ifeq ($(PABLOMK7), 1)
+	    NAME := BootNTRSelector-Mode3-PabloMK7-Banner
+	endif
+else
+    ifeq ($(FONZD), 1)
+	    NAME := BootNTRSelector-FONZD-Banner
+	endif
+
+	ifeq ($(PABLOMK7), 1)
+	    NAME := BootNTRSelector-PabloMK7-Banner
+	endif
+endif
+
 
 BUILD_DIR := build
 OUTPUT_DIR := output
@@ -23,20 +44,35 @@ EXTRA_OUTPUT_FILES :=
 LIBRARY_DIRS := $(PORTLIBS) $(CTRULIB)
 LIBRARIES := citro3d ctru png z m
 
+VERSION_MAJOR := 2
+VERSION_MINOR := 7
+VERSION_MICRO := 0
+
+
+
 BUILD_FLAGS := -march=armv6k -mtune=mpcore -mfloat-abi=hard
 BUILD_FLAGS_CC := -g -Wall -Wno-strict-aliasing -O3 -mword-relocations \
-					-fomit-frame-pointer -ffast-math $(ARCH) $(INCLUDE) -DARM11 -D_3DS $(BUILD_FLAGS)
+					-fomit-frame-pointer -ffast-math $(ARCH) $(INCLUDE) -DARM11 -D_3DS $(BUILD_FLAGS) \
+					-DFONZD_BANNER=${FONZD} -DPABLOMK7_BANNER=${PABLOMK7} \
+					-DAPP_VERSION_MAJOR=${VERSION_MAJOR} \
+					-DAPP_VERSION_MINOR=${VERSION_MINOR} \
+					-DAPP_VERSION_REVISION=${VERSION_MICRO} \
+					-DEXTENDEDMODE=${EXTENDEDMODE}
 BUILD_FLAGS_CXX := $(COMMON_FLAGS) -std=gnu++11
 RUN_FLAGS :=
 
-VERSION_MAJOR := 2
-VERSION_MINOR := 0
-VERSION_MICRO := 0
+
+
+
 
 # 3DS/Wii U CONFIGURATION #
 
 ifeq ($(TARGET),$(filter $(TARGET),3DS WIIU))
-    TITLE := $(NAME)
+	ifeq ($(EXTENDEDMODE), 1)
+    	TITLE := Boot NTR Selector Mode 3
+    else
+    	TITLE := Boot NTR Selector
+    endif
     DESCRIPTION := Enhanced NTR CFW Loader
     AUTHOR := Nanquitas
 endif
@@ -44,17 +80,25 @@ endif
 # 3DS CONFIGURATION #
 
 ifeq ($(TARGET),3DS)
-    LIBRARY_DIRS += $(DEVKITPRO)/libctru
+    LIBRARY_DIRS += $(DEVKITPRO)/libctru $(DEVKITPRO)/portlibs/armv6k/
     LIBRARIES += citro3d ctru png z m
 
     PRODUCT_CODE := CTR-P-BNTR
-    UNIQUE_ID := 0xEB000
+    ifeq ($(EXTENDEDMODE), 1)
+    	UNIQUE_ID := 0xEB300
+    else
+    	UNIQUE_ID := 0xEB000
+    endif
 
     CATEGORY := Application
     USE_ON_SD := true
 
     MEMORY_TYPE := Application
-    SYSTEM_MODE := 64MB
+    ifeq ($(EXTENDEDMODE), 1)
+    	SYSTEM_MODE := 80MB
+    else
+    	SYSTEM_MODE := 64MB
+    endif
     SYSTEM_MODE_EXT := Legacy
     CPU_SPEED := 268MHz
     ENABLE_L2_CACHE := true
@@ -63,22 +107,32 @@ ifeq ($(TARGET),3DS)
 
     ROMFS_DIR := romfs
     BANNER_AUDIO := resources/audio.wav
-    BANNER_IMAGE := resources/FonzD_banner.cgfx
-    #BANNER_IMAGE := resources/PabloMK7_banner.cgfx
-    ICON := resources/icon.png
-	LOGO := resources/logo.bcma.lz
-endif
-
-# Wii U CONFIGURATION #
-
-ifeq ($(TARGET),WIIU)
-    LIBRARY_DIRS +=
-    LIBRARIES +=
-
-    LONG_DESCRIPTION := Enhanced NTR CFW Loader
-    ICON :=
+	LOGO := 
+    ifeq ($(FONZD), 1)
+    	BANNER_IMAGE := resources/FonzD_banner.cgfx
+    endif
+    ifeq ($(PABLOMK7), 1)
+    	BANNER_IMAGE := resources/PabloMK7_banner.cgfx
+    endif
+    ifeq ($(EXTENDEDMODE), 1)
+    	ICON := resources/iconM3.png
+    else
+    	ICON := resources/icon.png
+    endif
 endif
 
 # INTERNAL #
 
 include buildtools/make_base
+
+FONZD: clean
+	make FONZD=1
+
+PABLOMK7: clean
+	make PABLOMK7=1
+
+FONZDM3: clean
+	make FONZD=1 EXTENDEDMODE=1
+
+PABLOMK7M3: clean
+	make PABLOMK7=1 EXTENDEDMODE=1

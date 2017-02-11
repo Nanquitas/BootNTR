@@ -24,11 +24,11 @@ static button_t         *useSecondButton;
 static button_t         *saveSettingButton;
 static button_t         *okButton;
 
-static sprite_t          *mainWindow;
-static sprite_t          *customWindow;
-static sprite_t          *defaultWindow;
-static sprite_t          *secondWindow;
-static sprite_t          *warningWindow;
+static sprite_t         *mainWindow;
+static sprite_t         *customWindow;
+static sprite_t         *defaultWindow;
+static sprite_t         *secondWindow;
+static sprite_t         *warningWindow;
 static window_t         *window;
 
 static u32              g_status;

@@ -51,11 +51,19 @@ static const char *fixedName[RELOC_COUNT] =
 
 static char fixedPath[RELOC_COUNT][0x100] = { 0 };
 
-static const char *ntrVersionStrings[3] =
+static const char *ntrVersionStrings[4] =
 {
     "ntr_3_2.bin",
     "ntr_3_3.bin",
-    "ntr_3_4.bin"
+    "ntr.o3ds.bin",
+    "ntr.n3ds.bin"
+};
+
+static const char *outNtrVersionStrings[3] =
+{
+    "ntr_3_2.bin",
+    "ntr_3_3.bin",
+    "ntr_3_4.bin",
 };
 
 static void patchBinary(u8 *mem, int size)
@@ -115,11 +123,17 @@ Result  loadAndPatch(version_t version)
     char    *plgPath;
     char    inPath[0x100];
     char    outPath[0x100];
-    u8      *mem;
+    u8      *mem;    
+    bool    isNew3DS = false;
+
+    APT_CheckNew3DS(&isNew3DS);
 
     binPath = bnConfig->config->binariesPath;
-    plgPath = bnConfig->config->pluginPath;
-    strJoin(inPath, "romfs:/", ntrVersionStrings[version]);
+    plgPath = bnConfig->config->pluginPath; 
+    if (version == V34 && isNew3DS)
+        strJoin(inPath, "romfs:/", ntrVersionStrings[version + 1]);
+    else
+        strJoin(inPath, "romfs:/", ntrVersionStrings[version]);        
     
 
     if (!strncmp("sdmc:", binPath, 5)) binPath += 5;
@@ -127,7 +141,7 @@ Result  loadAndPatch(version_t version)
 
     if (version != V32)
     {
-        strJoin(outPath, binPath, ntrVersionStrings[version]);
+        strJoin(outPath, binPath, outNtrVersionStrings[version]);
         strJoin(fixedPath[BINARY], binPath, ntrVersionStrings[version]);
         strJoin(fixedPath[PLUGIN], plgPath, fixedName[PLUGIN]);
         strJoin(fixedPath[DEBUG], binPath, ntrVersionStrings[version]);

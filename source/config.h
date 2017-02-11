@@ -2,6 +2,19 @@
 #define CONFIG_H
 
 #include "main.h"
+#include <time.h>   
+
+#ifndef SYSTEM_VERSION
+#define SYSTEM_VERSION(major, minor, revision) \
+    (((major)<<24)|((minor)<<16)|((revision)<<8))
+#endif
+
+#define CURRENT_CONFIG_VERSION  SYSTEM_VERSION(1, 0, 4)
+
+#define SECONDS_IN_WEEK     604800
+#define SECONDS_IN_DAY      86400
+#define SECONDS_IN_HOUR     3600
+#define SECONDS_IN_MINUTE   60
 
 enum
 {
@@ -13,9 +26,13 @@ enum
 
 typedef struct  config_s
 {
+    u32         version;
     u32         flags;
     char        binariesPath[0x100];
     char        pluginPath[0x100];
+    time_t      lastUpdateTime;
+    time_t      lastUpdateTime3;
+
 }               config_t;
 
 typedef struct  ntrConfig_s
@@ -51,6 +68,8 @@ typedef struct  ntrConfig_s
     u32         arm11BinStart;
     u32         arm11BinSize;
     u32         ShowDbgFunc;
+    u32         memorymode;
+    char        path[0x100];
 }               ntrConfig_t;
 
 typedef struct  bootNtrConfig_s
@@ -63,6 +82,7 @@ typedef struct  bootNtrConfig_s
     u32         requireKernelHax;
     version_t   versionToLaunch;
     config_t    *config;
+    bool        checkForUpdate;
 }               bootNtrConfig_t;
 
 void    configInit(void);

@@ -5,13 +5,33 @@
 #include <time.h>
 
 extern bootNtrConfig_t  *bnConfig;
+#if EXTENDEDMODE == 0
 static button_t         *V32Button;
 static button_t         *V33Button;
 static button_t         *V34Button;
 static sprite_t         *desiredVersionSprite;
-static sprite_t         *pressExitSprite;
 static sprite_t         *tinyButtonBGSprite;
+#endif
+static sprite_t         *pressExitSprite;
 static bool             userTouch = false;
+
+#if EXTENDEDMODE
+
+void    initMainMenu(void)
+{    
+    newSpriteFromPNG(&pressExitSprite, "romfs:/sprites/textSprites/pressBExit.png");
+
+    setSpritePos(pressExitSprite, 180.0f, 217.0f);
+
+    changeBottomFooter(pressExitSprite);
+}
+
+void    exitMainMenu(void)
+{
+    deleteSprite(pressExitSprite);
+}
+
+#else 
 
 void    selectVersion(u32 mode)
 {
@@ -38,9 +58,10 @@ void    selectVersion(u32 mode)
 void    initMainMenu(void)
 {
     sprite_t *sprite;
-    newSpriteFromPNG(&desiredVersionSprite, "romfs:/sprites/textSprites/touchDesiredVersion.png");
-    newSpriteFromPNG(&pressExitSprite, "romfs:/sprites/textSprites/pressBExit.png");
+
+    newSpriteFromPNG(&desiredVersionSprite, "romfs:/sprites/textSprites/touchDesiredVersion.png");    
     newSpriteFromPNG(&tinyButtonBGSprite, "romfs:/sprites/tinyButtonBackground.png");
+    newSpriteFromPNG(&pressExitSprite, "romfs:/sprites/textSprites/pressBExit.png");
 
     setSpritePos(desiredVersionSprite, 34.0f, 7.0f);
     setSpritePos(pressExitSprite, 180.0f, 217.0f);
@@ -73,6 +94,10 @@ void    exitMainMenu(void)
     deleteSprite(pressExitSprite);
 }
 
+#endif
+
+
+
 static const char * versionString[] =
 {
     "3.2",
@@ -100,7 +125,11 @@ int     mainMenu(void)
         updateUI();
     }    
     keys = 0;
+#if EXTENDEDMODE
+    while (1)
+#else
     while (userTouch == false)
+#endif
     {
         keys = hidKeysDown() | hidKeysHeld();
         if (keys == (KEY_L | KEY_R | KEY_X | KEY_DUP)) goto dumpMode;

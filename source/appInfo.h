@@ -3,9 +3,11 @@
 
 #include "draw.h"
 
-#define MAX_ENTRIES 10
-#define BUFFER_SIZE 100
-#define DEFAULT_COLOR 0xFFF8AE2D
+#define MAX_ENTRIES     10
+#define BUFFER_SIZE     100
+#define DEFAULT_COLOR   0xFFF8AE2D
+#define RED             0xFFFF0000
+#define GREEN           0xFF00FF00
 
 
 typedef enum

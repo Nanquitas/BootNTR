@@ -11,7 +11,6 @@ char			  *g_secondary_error = NULL;
 char			  *g_third_error = NULL;
 bool			  g_exit = false;
 
-
 int main(void)
 {
     u32         keys;
@@ -22,19 +21,36 @@ int main(void)
 	drawInit();
 	romfsInit();
     ptmSysmInit();
-    amInit();
-    httpcInit(0);
+
     initUI();
     hidScanInput();
     keys = (hidKeysDown() | hidKeysHeld());
     if (keys & KEY_SELECT)
         resetConfig();
     configInit();
-    if (launchUpdater())
+
+    // If keys == X or if config say we should check an update
+    if (keys & KEY_X || bnConfig->checkForUpdate)
     {
-        newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Updated !");
-        goto waitForExit;
+        // Check if the 3DS is connected
+        acInit();
+
+        u32 wifiStatus;
+        ACU_GetWifiStatus(&wifiStatus);
+        if (wifiStatus)
+        {
+            amInit();
+            httpcInit(0);
+            if (launchUpdater())
+            {
+                newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Updated !");
+                goto waitForExit;
+            }            
+
+        }
     }
+
+
     kernelVersion = osGetKernelVersion();
     initMainMenu();
     waitAllKeysReleased();
@@ -46,12 +62,30 @@ int main(void)
         if (!ret)
         {
             newAppStatus(DEFAULT_COLOR, CENTER | BOLD | NEWLINE, "Success !");
+
+        #if EXTENDEDMODE
+            
+            newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY | NEWLINE, "Press Home to launch");
+            newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY, "your game.");
+            updateUI();
+
+            g_exit = true;
+            while (aptMainLoop())
+            {
+                updateUI();
+            }
+            goto exit;
+
+        #else
+
             newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY | NEWLINE, "Returning to home");
             newAppStatus(DEFAULT_COLOR, CENTER | TINY | SKINNY, "menu ...");
-            updateUI();
             g_exit = true;
+            updateUI();
             svcSleepThread(100000);
             goto exit;
+        #endif
+
         }        
     }
 	if (g_exit || ret)
@@ -94,11 +128,12 @@ exit:
     configExit();
     exitMainMenu();
     exitUI();
+    acExit();
+    amExit();
+    httpcExit();
 	romfsExit();
 	drawExit();
 	gfxExit();
-    amExit();
-    httpcExit();
     if (!g_exit)
         PTMSYSM_RebootAsync(0);
     ptmSysmExit();

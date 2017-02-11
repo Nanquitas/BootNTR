@@ -3,7 +3,10 @@
 #include "graphics.h"
 #include "drawableObject.h"
 #include "button.h"
+#include "config.h"
+#include <time.h>
 
+extern bootNtrConfig_t *bnConfig;
 static updateData_t     *updateData;
 static window_t         *updaterWindow;
 static button_t         *okButton;
@@ -250,8 +253,11 @@ static Result parseResponseData(const char *jsonText, u32 size, bool *hasUpdate)
                     changelog = val->u.string.ptr;
             }
             if (name != NULL && assets != NULL)
-            {                
-                snprintf(versionString, sizeof(versionString), "%d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR);
+            {   
+                if (!APP_VERSION_REVISION)
+                    snprintf(versionString, sizeof(versionString), "%d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR);
+                else
+                    snprintf(versionString, sizeof(versionString), "%d.%d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_VERSION_REVISION);
                 if (strncmp(name->u.string.ptr, versionString, name->u.string.length) > 0)
                 {            
                     for (i = 0; i < assets->u.array.length; i++)
@@ -359,6 +365,11 @@ bool launchUpdater(void)
     update = false;
     updateData = (updateData_t *)calloc(1, sizeof(updateData_t));
     if (!updateData) goto error;
+#if EXTENDEDMODE
+    bnConfig->config->lastUpdateTime3 = time(NULL);
+#else
+    bnConfig->config->lastUpdateTime = time(NULL);
+#endif
     initUpdater();
     newAppTop(COLOR_BLANK, NEWLINE, "");
     newAppTop(COLOR_BLANK, 0, "Checking for update");

@@ -12,11 +12,30 @@
 #include "graphics.h"
 #include "mysvcs.h"
 
-#define APP_VERSION_MAJOR   2
-#define APP_VERSION_MINOR   3
-#define TIMER               2
-#define CIA_VERSION         "BootNTRSelector-FONZD-Banner.cia"
-//#define CIA_VERSION         "BootNTRSelector-PabloMK7-Banner.cia"
+#define TIMER               3
+
+#if EXTENDEDMODE
+
+    #if  FONZD_BANNER
+    #define CIA_VERSION         "BootNTRSelector-Mode3-FONZD-Banner.cia"
+    #endif 
+
+    #if  PABLOMK7_BANNER
+    #define CIA_VERSION         "BootNTRSelector-Mode3-PabloMK7-Banner.cia"
+    #endif
+
+#else
+
+    #if  FONZD_BANNER
+    #define CIA_VERSION         "BootNTRSelector-FONZD-Banner.cia"
+    #endif 
+
+    #if  PABLOMK7_BANNER
+    #define CIA_VERSION         "BootNTRSelector-PabloMK7-Banner.cia"
+    #endif
+
+#endif
+
 
 #define check_prim(result, err) if ((result) != 0) {g_primary_error = err; \
 	goto error; }
@@ -92,7 +111,7 @@ typedef enum    version_e
 {
     V32 = 0,
     V33 = 1,
-    V34 = 2
+    V34 = 2,
 }               version_t;
 
 /*
@@ -158,6 +177,8 @@ u32		rtAlignToPageSize(u32 size);
 u32		rtGetPageOfAddress(u32 addr);
 u32		rtCheckRemoteMemoryRegionSafeForWrite(Handle hProcess, u32 addr, u32 size);
 u32     memfind(u8 *startPos, u32 size, const void *pattern, u32 patternSize);
+u32     findNearestSTMFD(u32 base, u32 pos);
+u32     searchBytes(u32 startAddr, u32 endAddr, u8* pat, int patlen, int step);
 
 /*
 ** firmware.c   

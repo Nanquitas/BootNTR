@@ -55,6 +55,7 @@ u32 loadNTRBin(void)
     FILE                *ntr;
     u32                 ret;
     char                path[0x100];
+
     static const char   *ntrVersionStrings[3] =
     {
         "ntr_3_2.bin",
@@ -66,6 +67,16 @@ u32 loadNTRBin(void)
         strJoin(path, "/", "ntr.bin");
     else
         strJoin(path, bnConfig->config->binariesPath + 5, ntrVersionStrings[bnConfig->versionToLaunch]);
+
+    if (bnConfig->versionToLaunch == V34)
+    {
+        strJoin(ntrConfig->path, bnConfig->config->binariesPath + 5, ntrVersionStrings[bnConfig->versionToLaunch]);
+    #if EXTENDEDMODE
+        ntrConfig->memorymode = 3;
+    #else
+        ntrConfig->memorymode = 0;
+    #endif
+    }
     
     // Get size
     ntr = fopen(path, "rb");
@@ -85,12 +96,14 @@ u32 loadNTRBin(void)
 
     // Read to memory
     memset(mem, 0, alignedSize * 2);
-    fread(mem, size, 1, ntr);
+    u8 *temp = (u8 *)calloc(1, alignedSize);
+    fread(temp, size, 1, ntr);
     fclose(ntr);
-    ret = svcFlushProcessDataCache(getCurrentProcessHandle(), mem, alignedSize);
-    // Don't know why but we need to copy the data, else it crash...
-    memcpy(mem + alignedSize, mem, size);
-    ret = svcFlushProcessDataCache(getCurrentProcessHandle(), mem, alignedSize * 2);
+    svcFlushProcessDataCache(getCurrentProcessHandle(), temp, size);
+
+    copyRemoteMemory(getCurrentProcessHandle(), (u32)mem, getCurrentProcessHandle(), (u32)temp, size);
+    copyRemoteMemory(getCurrentProcessHandle(), (u32)mem + alignedSize, getCurrentProcessHandle(), (u32)temp, size);
+    free(temp);
     return ((u32)mem);
 error:
     return (RESULT_ERROR);
@@ -114,6 +127,10 @@ Result		bnLoadAndExecuteNTR(void)
 	return (0);
 error:
 	return (RESULT_ERROR);
+}
+void        showDbg(char *str)
+{
+     newAppTop(DEFAULT_COLOR, TINY | SKINNY, str);
 }
 
 Result		bnBootNTR(void)
@@ -142,7 +159,9 @@ Result		bnBootNTR(void)
     
     // Free temp buffer
     linearFree(linearAddress);
-
+#if DEBUG
+    ntrConfig->ShowDbgFunc = (u32)showDbg;
+#endif
     // Load NTR
 	ret = bnLoadAndExecuteNTR();
 	check_third(ret, LOAD_FAILED);

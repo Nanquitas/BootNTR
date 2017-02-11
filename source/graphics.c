@@ -40,7 +40,10 @@ void    initUI(void)
     appTop = newAppInfoObject(topInfoSprite, 14, 55.0f, 30.0f);
     appInfoSetTextBoundaries(appTop, 345.0f, 210.0f);
 
-    sprintf(appVersion, "Version: %d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR);
+    if (!APP_VERSION_REVISION)
+        sprintf(appVersion, "Version: %d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR);
+    else
+        sprintf(appVersion, "Version: %d.%d.%d", APP_VERSION_MAJOR, APP_VERSION_MINOR, APP_VERSION_REVISION);
     updateUI();
 }
 
