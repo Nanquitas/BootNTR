@@ -106,6 +106,7 @@ ifeq ($(TARGET),3DS)
 
     ROMFS_DIR := romfs
     BANNER_AUDIO := resources/audio.wav
+	LOGO := 
     ifeq ($(FONZD), 1)
     	BANNER_IMAGE := resources/FonzD_banner.cgfx
     else
