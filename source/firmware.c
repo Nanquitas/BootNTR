@@ -252,7 +252,7 @@ Result	bnInitParamsByFirmware(void)
 	u32 commitHash = (u32)out;
 	char commit[8];
 	sprintf(commit, "%08x", commitHash);
-	if (major >= 9 || (major >= 8 && (strcmp(commit, "9c5766f6") == 0 || strcmp(commit, "c9701f93") == 0 || strcmp(commit, "56e54cd1") == 0 || strcmp(commit, "55836b48") == 0 || strcmp(commit, "1c2e8dec") == 0 || strcmp(commit, "506b16db") == 0 || strcmp(commit, "44b5e103") == 0 || strcmp(commit, "a4899a1b") == 0 || strcmp(commit, "22a8661f") == 0 ))) bnConfig->SMPatchAddr = 0;
+	if (major >= 9 || (major >= 8 && (strcmp(commit, "cf8696ac") == 0 || strcmp(commit, "9c5766f6") == 0 || strcmp(commit, "c9701f93") == 0 || strcmp(commit, "56e54cd1") == 0 || strcmp(commit, "55836b48") == 0 || strcmp(commit, "1c2e8dec") == 0 || strcmp(commit, "506b16db") == 0 || strcmp(commit, "44b5e103") == 0 || strcmp(commit, "a4899a1b") == 0 || strcmp(commit, "22a8661f") == 0 ))) bnConfig->SMPatchAddr = 0;
 
 	bnConfig->requireKernelHax = 0;
     return (0);
